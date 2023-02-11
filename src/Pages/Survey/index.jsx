@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import colors from '../../utils/style/colors'
 import { Loader } from '../../utils/style/atoms'
 import styled from 'styled-components'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
+import { SurveyContext } from '../../utils/context'
 
 // Style Compoenent : CSS in JS
 const SurveyContainer = styled.div`
@@ -31,6 +32,31 @@ const LinkWrapper = styled.div`
   }
 `
 
+const ReplyBox = styled.button`
+  border: none;
+  height: 100px;
+  width: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: ${colors.backgroundLight};
+  border-radius: 30px;
+  cursor: pointer;
+  box-shadow: ${(props) =>
+    props.isSelected ? `0px 0px 0px 2px ${colors.primary} inset` : 'none'};
+  &:first-child {
+    margin-right: 15px;
+  }
+  &:last-of-type {
+    margin-left: 15px;
+  }
+`
+
+const ReplyWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+`
+
 function Survey() {
   const { questionNumber } = useParams()
   const questionNumberInt = parseInt(questionNumber)
@@ -39,6 +65,8 @@ function Survey() {
   const [surveyData, setSurveyData] = useState({})
   const [isDataLoading, setDataLoading] = useState(false)
   const [error, setError] = useState(false)
+  const { answers, saveAnswers } = useContext(SurveyContext)
+  console.log(answers)
 
   // Cette syntaxe permet aussi bien de faire des calls API.
   // Mais pour utiliser await dans une fonction, il faut que celle-ci soit async (pour asynchrone).
@@ -77,7 +105,7 @@ function Survey() {
       setDataLoading(true)
       try {
         // on utilise await quand le type de retour est une promesse
-        const response = await fetch(`http://localhost:8000/surveys`)
+        const response = await fetch(`http://localhost:8000/survey`)
         const { surveyData } = await response.json()
         setSurveyData(surveyData)
       } catch (error) {
@@ -99,6 +127,12 @@ function Survey() {
     )
   }
 
+  // cette fonction a pour objectif d'enregistrer les reponses de l'utilisateur
+  // answer : true - false
+  function saveReply(answer) {
+    saveAnswers({ [questionNumber]: answer })
+  }
+
   return (
     <SurveyContainer>
       <QuestionTitle>Question {questionNumber}</QuestionTitle>
@@ -106,6 +140,23 @@ function Survey() {
         <Loader />
       ) : (
         <QuestionContent>{surveyData[questionNumber]}</QuestionContent>
+      )}
+      {/** si on recupere le tableau de reponse depuis le contexte */}
+      {answers && (
+        <ReplyWrapper>
+          <ReplyBox
+            onClick={() => saveReply(true)}
+            isSelected={answers[questionNumber] === true}
+          >
+            Oui
+          </ReplyBox>
+          <ReplyBox
+            onClick={() => saveReply(false)}
+            isSelected={answers[questionNumber] === false}
+          >
+            Non
+          </ReplyBox>
+        </ReplyWrapper>
       )}
       <LinkWrapper>
         <Link to={`/survey/${prevQuestionNumber}`}>Précédent</Link>
