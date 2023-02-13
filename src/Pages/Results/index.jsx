@@ -53,8 +53,18 @@ const LoaderWrapper = styled.div`
   justify-content: center;
 `
 
+// tant qu'on est pas arriver au dernier titre, on met ',' a chaque fois
+export function formatJobList(title, listLength, index) {
+  if (index === listLength - 1) {
+    return title
+  }
+  return `${title},`
+}
+// 'item2', 3, 1
+// item2,
+
 // mise en forme du body de notre fetch (answers users) que l'on souhaite envoyer
-function formatFetchParams(answers) {
+export function formatQueryParams(answers) {
   const answerNumbers = Object.keys(answers)
 
   return answerNumbers.reduce((previousParams, answerNumber, index) => {
@@ -64,10 +74,16 @@ function formatFetchParams(answers) {
   }, '')
 }
 
+/**
+ * {1:true, 2:false....}
+ * ['',&]a1:[1,0]
+ * previousParams va concatener les anciens return a chaque iteration
+ */
+
 function Results() {
   const { theme } = useContext(ThemeContext)
   const { answers } = useContext(SurveyContext)
-  const fetchParams = formatFetchParams(answers)
+  const fetchParams = formatQueryParams(answers)
 
   const { data, isLoading, error } = useFetch(
     `http://localhost:8000/results?${fetchParams}`
@@ -87,7 +103,7 @@ function Results() {
 
   return isLoading ? (
     <LoaderWrapper>
-      <Loader />
+      <Loader theme={theme} data-testid="loader" />
     </LoaderWrapper>
   ) : (
     <ResultsContainer theme={theme}>
@@ -99,8 +115,7 @@ function Results() {
               key={`result-title-${index}-${result.title}`}
               theme={theme}
             >
-              {result.title}
-              {index === resultsData.length - 1 ? '' : ','}
+              {formatJobList(result.title, resultsData.length, index)}
             </JobTitle>
           ))}
       </ResultsTitle>
@@ -114,8 +129,10 @@ function Results() {
               theme={theme}
               key={`result-detail-${index}-${result.title}`}
             >
-              <JobTitle theme={theme}>{result.title}</JobTitle>
-              <p>{result.description}</p>
+              <JobTitle theme={theme} data-testid="job-title">
+                {result.title}
+              </JobTitle>
+              <p data-testid="job-description">{result.description}</p>
             </JobDescription>
           ))}
       </DescriptionWrapper>
