@@ -11,6 +11,8 @@ import { ThemeProvider } from './utils/context'
 import Footer from './components/Footer'
 import GlobalStyle from './utils/style/GlobalStyle'
 import { SurveyProvider } from './utils/context'
+import Profile from './Pages/Profile'
+import { element } from 'prop-types'
 
 // const GlobalStyle = createGlobalStyle`
 //     div {
@@ -37,6 +39,7 @@ root.render(
             <Route path="/survey/:questionNumber" element={<Survey />} />
             <Route path="/results/" element={<Results />} />
             <Route path="/freelances" element={<Freelances />} />
+            <Route path="/profile/:id" element={<Profile />} />
             <Route path="*" element={<Error />} />
           </Routes>
           <Footer />
